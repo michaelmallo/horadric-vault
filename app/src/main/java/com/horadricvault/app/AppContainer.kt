@@ -12,11 +12,8 @@ import com.horadricvault.core.network.BuildScraperService
 
 class AppContainer(private val context: Context) {
 
-    // Web client ID for Google SSO (can be updated with your Firebase Web Client ID)
-    private val webClientId = "123456789012-sampleclientid.apps.googleusercontent.com"
-
     val googleAuthClient: GoogleAuthClient by lazy {
-        GoogleAuthClient(context, webClientId)
+        GoogleAuthClient()
     }
 
     val authRepository: AuthRepository by lazy {

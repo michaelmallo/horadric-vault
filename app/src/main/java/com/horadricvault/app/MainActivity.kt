@@ -35,7 +35,7 @@ class MainActivity : ComponentActivity() {
                     isAuthLoading = true
                     authErrorMessage = null
                     lifecycleScope.launch {
-                        val tokenResult = container.googleAuthClient.signIn()
+                        val tokenResult = container.googleAuthClient.signInWithGoogle(activityContext = this@MainActivity)
                         tokenResult.fold(
                             onSuccess = { idToken ->
                                 val firebaseResult = container.authRepository.signInWithGoogleIdToken(idToken)

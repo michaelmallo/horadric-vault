@@ -1,6 +1,9 @@
 package com.horadricvault.core.auth
 
+import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -25,5 +28,23 @@ class AuthUnitTest {
 
         val error = AuthState.Error(message = "Network timeout connecting to Sanctuary auth gateway")
         assertEquals("Network timeout connecting to Sanctuary auth gateway", error.message)
+    }
+
+    @Test
+    fun testBuildGoogleSignInRequestConfiguration() {
+        val client = GoogleAuthClient()
+        val webClientId = "123456789012-sampleclientid.apps.googleusercontent.com"
+        val request = client.buildGoogleSignInRequest(webClientId)
+
+        assertNotNull(request)
+        assertEquals(1, request.credentialOptions.size)
+
+        val option = request.credentialOptions[0]
+        assertTrue(option is GetGoogleIdOption)
+
+        val googleIdOption = option as GetGoogleIdOption
+        assertEquals(webClientId, googleIdOption.serverClientId)
+        assertFalse("filterByAuthorizedAccounts must be false to prevent NoCredentialException on first login", googleIdOption.filterByAuthorizedAccounts)
+        assertFalse(googleIdOption.autoSelectEnabled)
     }
 }
