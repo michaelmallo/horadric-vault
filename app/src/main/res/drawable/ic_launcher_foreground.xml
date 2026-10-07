@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <group
+        android:translateX="27"
+        android:translateY="27"
+        android:scaleX="2.25"
+        android:scaleY="2.25">
+        <!-- Shield Drop Shadow / Border -->
+        <path
+            android:fillColor="#4A330B"
+            android:pathData="M12,0.5 L2,4.8 v6.5 c0,6.2 4.3,11.9 10,13.2 c5.7,-1.3 10,-7 10,-13.2 V4.8 L12,0.5 z" />
+
+        <!-- Main Golden Shield Body -->
+        <path
+            android:fillColor="#D4AF37"
+            android:pathData="M12,1 L3,5 v6 c0,5.55 3.84,10.74 9,12 c5.16,-1.26 9,-6.45 9,-12 V5 L12,1 z" />
+
+        <!-- Left Bevel Highlight (Radiant Gold) -->
+        <path
+            android:fillColor="#F9E79F"
+            android:pathData="M12,2 L4.5,5.4 v5.6 c0,4.6 3.1,8.9 7.5,10.2 V2 z" />
+
+        <!-- Right Bevel Shade (Burnished Gold) -->
+        <path
+            android:fillColor="#B7950B"
+            android:pathData="M12,2 v19.2 c4.4,-1.3 7.5,-5.6 7.5,-10.2 V5.4 L12,2 z" />
+
+        <!-- Inner Dark Inlay -->
+        <path
+            android:fillColor="#1A1108"
+            android:pathData="M12,4.5 L6,7.5 v4 c0,3.8 2.5,7.2 6,8.2 c3.5,-1 6,-4.4 6,-8.2 v-4 L12,4.5 z" />
+
+        <!-- Inner Golden Crest / Cross Emblem -->
+        <path
+            android:fillColor="#D4AF37"
+            android:pathData="M12,6 L7.5,8.5 v3 c0,2.8 1.9,5.5 4.5,6.3 c2.6,-0.8 4.5,-3.5 4.5,-6.3 v-3 L12,6 z" />
+
+        <!-- Horadric Central Ruby / Ember Core -->
+        <path
+            android:fillColor="#C0392B"
+            android:pathData="M12,9.5 L14,12 L12,14.5 L10,12 z" />
+        <path
+            android:fillColor="#F1948A"
+            android:pathData="M12,10.2 L13.3,12 L12,13.8 L10.7,12 z" />
+    </group>
+</vector>

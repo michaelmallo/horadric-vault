@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horadric Vault — Diablo IV Companion & Armory</title>
+    <meta name="description" content="Native web companion for Diablo 4 featuring Armory loadouts, Torment IV stat mitigation calculator, interactive Sanctuary map, and meta build guides.">
+    <meta name="theme-color" content="#0D0907">
+    <link rel="icon" type="image/svg+xml" href="./icons/shield.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+
+    <!-- Header & Top Navigation -->
+    <header class="vault-header">
+        <div class="header-container">
+            <a href="#" class="vault-brand">
+                <img src="./icons/shield.svg" alt="Horadric Vault" class="brand-icon">
+                <div class="brand-text">
+                    <h1>HORADRIC VAULT</h1>
+                    <div class="brand-subtitle">Sanctuary Armory & Torment Engine</div>
+                </div>
+            </a>
+
+            <div class="header-controls">
+                <select id="realmSelect" class="select-control" aria-label="Select Realm">
+                    <option value="Seasonal (Softcore)">Seasonal (Softcore)</option>
+                    <option value="Seasonal (Hardcore)">Seasonal (Hardcore)</option>
+                    <option value="Eternal Realm">Eternal Realm</option>
+                </select>
+
+                <select id="tormentSelect" class="select-control" aria-label="Select Torment Difficulty">
+                    <!-- Populated dynamically -->
+                </select>
+
+                <button id="authBtn" class="btn btn-outline" type="button">
+                    <span>Google SSO Sync</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="vault-nav" aria-label="Vault Tabs">
+        <div class="nav-container">
+            <button class="nav-tab active" data-target="armory">
+                <span>🛡️</span> Armory
+            </button>
+            <button class="nav-tab" data-target="builds">
+                <span>📜</span> Meta Builds
+            </button>
+            <button class="nav-tab" data-target="map">
+                <span>🗺️</span> Sanctuary Map
+            </button>
+            <button class="nav-tab" data-target="statcheck">
+                <span>⚖️</span> Torment Stat Check
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content Application Body -->
+    <main class="vault-main">
+
+        <!-- Active Character Summary Ribbon -->
+        <section class="character-ribbon">
+            <div class="char-identity">
+                <div class="char-avatar" id="charAvatar">🦅</div>
+                <div class="char-meta">
+                    <h2 id="charName">Vessel Conqueror</h2>
+                    <div class="char-tags">
+                        <span class="badge badge-gold" id="charClassBadge">Spiritborn</span>
+                        <span class="badge badge-cyan" id="charLevelBadge">Lvl 60 (120 Paragon)</span>
+                        <span class="badge badge-crimson" id="charTormentBadge">Torment IV</span>
+                        <span class="badge badge-gold" id="charRealmBadge">Seasonal (Softcore)</span>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                <button class="btn btn-outline" onclick="alert('Character data is automatically synced locally in your browser and Firebase account.')">
+                    💾 Status: Saved
+                </button>
+            </div>
+        </section>
+
+        <!-- 1. Armory Pane -->
+        <section id="armory" class="tab-pane active">
+            <div class="armory-grid" id="armoryGrid">
+                <!-- Dynamically populated 10 equipment slots -->
+            </div>
+        </section>
+
+        <!-- 2. Meta Build Guides Pane -->
+        <section id="builds" class="tab-pane">
+            <div class="builds-catalog" id="buildsCatalog">
+                <!-- Dynamically populated builds -->
+            </div>
+        </section>
+
+        <!-- 3. Sanctuary Map Pane -->
+        <section id="map" class="tab-pane">
+            <div class="map-viewport">
+                <!-- HUD Filters -->
+                <div class="map-hud">
+                    <span style="font-size: 0.72rem; text-transform: uppercase; color: var(--color-gold-400); font-weight: 700;">Cartography Filters</span>
+                    <div class="map-filters">
+                        <button class="filter-btn active" data-type="all">All Pins</button>
+                        <button class="filter-btn" data-type="altar">Altars & Tenets</button>
+                        <button class="filter-btn" data-type="waypoint">Waypoints</button>
+                        <button class="filter-btn" data-type="stronghold">Strongholds</button>
+                        <button class="filter-btn" data-type="boss">Torment Bosses</button>
+                    </div>
+                </div>
+
+                <!-- Zoom & Reset Controls -->
+                <div class="map-controls">
+                    <button id="zoomInBtn" class="map-ctrl-btn" title="Zoom In">+</button>
+                    <button id="zoomOutBtn" class="map-ctrl-btn" title="Zoom Out">−</button>
+                    <button id="resetMapBtn" class="map-ctrl-btn" title="Reset View">⟲</button>
+                </div>
+
+                <!-- Vector Map Canvas -->
+                <canvas id="sanctuaryCanvas"></canvas>
+
+                <!-- Floating Node Popup -->
+                <div id="mapPopup" class="map-node-popup">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+                        <div>
+                            <h4 id="popupTitle" style="font-family: var(--font-heading); color: var(--color-gold-300); font-size: 1.05rem;">Node Title</h4>
+                            <div id="popupRegion" style="font-size: 0.75rem; color: var(--text-secondary);">Region info</div>
+                        </div>
+                        <button id="popupCloseBtn" style="background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 1.2rem;">✕</button>
+                    </div>
+                    <div id="popupBonus" style="font-size: 0.85rem; color: var(--color-cyan-400); margin-bottom: 0.75rem;">Bonus Info</div>
+                    <div style="display: flex; justify-content: flex-end;">
+                        <button id="popupToggleBtn" class="btn btn-crimson">Mark Done</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. Torment Stat Check Pane -->
+        <section id="statcheck" class="tab-pane">
+            <div class="stat-check-grid">
+                
+                <!-- Armor Card -->
+                <div class="stat-card">
+                    <h3>
+                        <span>Physical Armor</span>
+                        <span id="armorStatusText" style="font-size: 0.8rem; font-weight: 700;">OPTIMAL</span>
+                    </h3>
+                    <div class="stat-gauge-container">
+                        <div class="gauge-track">
+                            <div class="gauge-fill optimal" id="armorGaugeFill" style="width: 100%;"></div>
+                        </div>
+                    </div>
+                    <div class="stat-numeric-row">
+                        <span style="color: var(--text-secondary);">Gross Sheet Armor:</span>
+                        <strong id="armorGrossVal" style="color: var(--color-gold-400); font-family: var(--font-mono);">2,050</strong>
+                    </div>
+                    <div class="stat-numeric-row">
+                        <span style="color: var(--text-secondary);">Torment Cap Goal:</span>
+                        <strong id="armorTargetVal" style="font-family: var(--font-mono);">2,000 (1,000 Effective)</strong>
+                    </div>
+                    <div class="stat-numeric-row">
+                        <span style="color: var(--text-secondary);">Physical Mitigation:</span>
+                        <strong id="armorMitigationVal" style="color: var(--color-green-400); font-family: var(--font-mono);">85.0% DR</strong>
+                    </div>
+                </div>
+
+                <!-- Elemental Resistances Card -->
+                <div class="stat-card">
+                    <h3>
+                        <span>Elemental Resistances</span>
+                        <span style="font-size: 0.75rem; color: var(--text-secondary);">Standard Cap: 70.0%</span>
+                    </h3>
+                    <div class="res-list">
+                        <div class="res-item-row">
+                            <div class="res-header">
+                                <span>🔥 Fire Resistance</span>
+                                <strong id="fireResText">70.0% (CAPPED)</strong>
+                            </div>
+                            <div class="gauge-track">
+                                <div class="gauge-fill optimal" id="fireResFill" style="width: 100%;"></div>
+                            </div>
+                        </div>
+                        <div class="res-item-row">
+                            <div class="res-header">
+                                <span>❄️ Cold Resistance</span>
+                                <strong id="coldResText">70.0% (CAPPED)</strong>
+                            </div>
+                            <div class="gauge-track">
+                                <div class="gauge-fill optimal" id="coldResFill" style="width: 100%;"></div>
+                            </div>
+                        </div>
+                        <div class="res-item-row">
+                            <div class="res-header">
+                                <span>⚡ Lightning Resistance</span>
+                                <strong id="lightningResText">70.0% (CAPPED)</strong>
+                            </div>
+                            <div class="gauge-track">
+                                <div class="gauge-fill optimal" id="lightningResFill" style="width: 100%;"></div>
+                            </div>
+                        </div>
+                        <div class="res-item-row">
+                            <div class="res-header">
+                                <span>🧪 Poison Resistance</span>
+                                <strong id="poisonResText">70.0% (CAPPED)</strong>
+                            </div>
+                            <div class="gauge-track">
+                                <div class="gauge-fill optimal" id="poisonResFill" style="width: 100%;"></div>
+                            </div>
+                        </div>
+                        <div class="res-item-row">
+                            <div class="res-header">
+                                <span>🌑 Shadow Resistance</span>
+                                <strong id="shadowResText">70.0% (CAPPED)</strong>
+                            </div>
+                            <div class="gauge-track">
+                                <div class="gauge-fill optimal" id="shadowResFill" style="width: 100%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Secondary Offense & Mobility -->
+                <div class="stat-card">
+                    <h3>
+                        <span>Combat Speeds & Criticals</span>
+                        <span style="font-size: 0.75rem; color: var(--color-gold-400);">Progression</span>
+                    </h3>
+                    <div style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem;">
+                        <div style="background: var(--color-obsidian-950); padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+                            <div style="font-size: 0.8rem; color: var(--text-secondary);">Movement Speed (Cap: 200%)</div>
+                            <div id="speedVal" style="font-family: var(--font-mono); font-size: 1.4rem; color: var(--color-cyan-400); font-weight: 700;">145%</div>
+                        </div>
+                        <div style="background: var(--color-obsidian-950); padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+                            <div style="font-size: 0.8rem; color: var(--text-secondary);">Critical Strike Chance (Cap: 100%)</div>
+                            <div id="critVal" style="font-family: var(--font-mono); font-size: 1.4rem; color: var(--color-gold-400); font-weight: 700;">72.5%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Torment IV Readiness Diagnosis -->
+                <div class="stat-card" style="grid-column: 1 / -1; border-color: var(--color-gold-600);" id="verdictCard">
+                    <!-- Populated dynamically -->
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Equipment Slot Editor Modal Dialog -->
+    <dialog id="itemModal" class="item-modal">
+        <div class="modal-header">
+            <h3 id="modalSlotTitle">Configure Equipment Slot</h3>
+            <button type="button" class="btn btn-outline" onclick="document.getElementById('itemModal').close()" style="padding: 0.2rem 0.5rem;">✕</button>
+        </div>
+        <form method="dialog" id="itemForm">
+            <div class="form-group">
+                <label for="modalItemName">Item Name</label>
+                <input type="text" id="modalItemName" class="form-input" required>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                <div class="form-group">
+                    <label for="modalRarity">Rarity</label>
+                    <select id="modalRarity" class="form-input">
+                        <option value="MAGIC">Magic</option>
+                        <option value="RARE">Rare</option>
+                        <option value="LEGENDARY">Legendary</option>
+                        <option value="UNIQUE">Unique</option>
+                        <option value="MYTHIC_UNIQUE">Mythic Unique</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="modalItemPower">Item Power</label>
+                    <input type="number" id="modalItemPower" class="form-input" min="100" max="800">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="modalMasterwork">Masterworking Rank (0 - 12)</label>
+                <input type="number" id="modalMasterwork" class="form-input" min="0" max="12">
+            </div>
+            <div class="form-group">
+                <label for="modalAffixes">Affixes (One per line, include ⭐ for Greater Affixes)</label>
+                <textarea id="modalAffixes" class="form-input" rows="4"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="modalAspect">Legendary Aspect or Unique Power</label>
+                <textarea id="modalAspect" class="form-input" rows="2"></textarea>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-outline" id="modalCancelBtn">Cancel</button>
+                <button type="submit" class="btn btn-primary" id="modalSaveBtn">Save Changes</button>
+            </div>
+        </form>
+    </dialog>
+
+    <!-- Footer -->
+    <footer class="vault-footer">
+        <p><strong>Horadric Vault</strong> — Diablo IV Native Companion & Web Architecture.</p>
+        <p style="margin-top: 0.5rem; font-size: 0.78rem;">
+            Diablo IV is a registered trademark of Blizzard Entertainment, Inc. Horadric Vault is an open-source companion project.
+        </p>
+    </footer>
+
+    <!-- App Logic Module -->
+    <script type="module" src="./app.js"></script>
+</body>
+</html>

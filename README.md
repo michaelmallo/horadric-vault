@@ -20,6 +20,22 @@ The application is structured using Modern Android Architecture principles (MVI 
 | `:feature:armory` | Multi-character armory manager, Greater Affixes, Tempers, Masterworking (0..12), Delta Progression Roadmap |
 | `:feature:buildguide` | Build catalog filterable by class/tier rating, URL guide importer, BiS target item inspector |
 | `:feature:map` | Interactive vector Canvas Sanctuary Atlas for 6 regions, filterable node markers, drop-trigger side quest checklist |
+| `docs/` | Web-based companion app deployable to GitHub Pages (HTML5, Modern CSS, Vector Canvas Map, Armory & Torment Calculator) |
+
+---
+
+## 2. Web Companion & GitHub Pages Deployment
+
+Horadric Vault includes a full-featured web companion in the [`docs/`](./docs) folder ready for GitHub Pages:
+
+* **Live GitHub Pages URL:** `https://michaelmallo.github.io/horadric-vault/`
+* **Features:**
+  * 🛡️ **Interactive Armory:** Equipment slots with item rarities, Masterworking ranks (0..12), Greater Affixes, and slot configuration modal.
+  * 📜 **Meta Builds Catalog:** Pre-loaded endgame builds with 1-click "Equip to Armory" synchronization.
+  * 🗺️ **Sanctuary Atlas:** Vector-rendered interactive map with pan, zoom, and filters for Altars of Lilith, Tenets of Akarat, Waypoints, Strongholds, and Torment Bosses with completion tracking.
+  * ⚖️ **Torment Stat Check:** Real-time Armor and Elemental Resistance calculation with Torment 1-4 scaling penalties and readiness diagnosis.
+  * 💾 **Cloud & Local Offline Sync:** Firebase Auth + LocalStorage offline-first fallback.
+* **Automatic CI/CD:** Powered by [`.github/workflows/deploy-pages.yml`](./.github/workflows/deploy-pages.yml). To enable, go to **Settings** > **Pages** in the GitHub repository and select either **GitHub Actions** or **Deploy from a branch (`main` / `docs`)**.
 
 ---
 
